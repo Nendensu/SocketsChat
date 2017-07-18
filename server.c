@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 	    error("ERROR reading from socket");
      	}
 
-     	printf("Here is the message: %s\n", buffer);
+     	printf("Here is the message: %s", buffer);
      	n = write(newsockfd, "I got your message", 18);
      
      	if (n < 0) { 

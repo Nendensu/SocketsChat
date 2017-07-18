@@ -46,7 +46,14 @@ int main(int argc, char *argv[])
     if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
         error("ERROR connecting");
     }
-        
+    
+    printf("Please enter your name: ");
+    
+    bzero(buffer, 256);
+    fgets(buffer, 256, stdin);
+
+
+
     while(1) {
         printf("Please enter the message: ");
         
@@ -68,13 +75,14 @@ int main(int argc, char *argv[])
         
         printf("%s\n",buffer);
     }
+
     close(sockfd);
+
     return 0;
 }
 
-void error(const char *msg)
-{
+void error(const char *msg) {
     perror(msg);
     
-    exit(0);
+    exit(1);
 }
