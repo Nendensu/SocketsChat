@@ -16,12 +16,12 @@ run: $(client) $(server)
 	@build/server 1337
 	@build/client 127.0.0.1 1337
 
-$(client): client.c
+$(client): src/client.c
 	@mkdir -p $(shell dirname $@)
-	@echo "Compile client par"
+	@echo "Compile client part"
 	@gcc $< -o $@
 
-$(server): server.c
+$(server): src/server.c
 	@mkdir -p $(shell dirname $@)
 	@echo "Compile server part"
 	@gcc $< -o $@
