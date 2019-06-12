@@ -11,7 +11,7 @@ void raise_error(const char *msg);
 
 int main(int argc, char *argv[])
 {
-    int sockfd, portno;
+    int sockfd, portnum;
     char buffer[1024];
     struct sockaddr_in serv_addr;
     struct hostent *server;
@@ -29,8 +29,8 @@ int main(int argc, char *argv[])
         raise_error("Opening socket");
     }
 
-    portno = atoi(argv[2]);
-    if(portno < 1 || portno > 65535)
+    portnum = atoi(argv[2]);
+    if(portnum < 1 || portnum > 65535)
     {
         raise_error("Incorrect port number");
     }
@@ -45,14 +45,19 @@ int main(int argc, char *argv[])
     serv_addr.sin_family = AF_INET;
 
     bcopy(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
-    serv_addr.sin_port = htons(portno);
+    serv_addr.sin_port = htons(portnum);
     
     if(connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) 
     {
         raise_error("Can't connection to the destanation host");
     }
+
+    printf("\033[0;32m---> Successfully connect to the %s on port %d\033[0m\n", argv[1], portnum);
+    fflush(stdout);
     
     printf("Please enter your name: ");
+    fflush(stdout);
+
     bzero(buffer, 256);
     fgets(buffer, 255, stdin);
     strtok(buffer, "\n");
@@ -62,10 +67,22 @@ int main(int argc, char *argv[])
     {
         raise_error("Writing to socket");
     }
+    
+    bzero(buffer, 1024);
+
+    check = read(sockfd, buffer, 1023);
+    if (check < 0) 
+    {
+        raise_error("Reading from socket");
+    }
+        
+    printf("\033[0;33m%s\033[0m\n", buffer);
+    fflush(stdout);
 
     while(1) 
     {
         printf("Please enter the message: ");
+        fflush(stdout);
         
         bzero(buffer, 1024);
         fgets(buffer, 1023, stdin);
@@ -85,7 +102,8 @@ int main(int argc, char *argv[])
             raise_error("Reading from socket");
         }
         
-        printf("%s\n",buffer);
+        printf("%s\n", buffer);
+        fflush(stdout);
     }
 
     close(sockfd);
@@ -96,6 +114,7 @@ int main(int argc, char *argv[])
 void raise_error(const char *msg) 
 {
     fprintf(stderr, "\033[0;31m==> ERROR: %s \033[0m\n", msg);
+    fflush(stderr);
     
     exit(1);
 }
