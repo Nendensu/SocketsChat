@@ -28,7 +28,9 @@ Simply use the following commands in a terminal:
 ```
 git clone https://github.com/AnyKeyShik/SocketsChat.git
 cd SocketsChat
-make run
+make all
+./build/server <port_for_binding>
+./build/client <host_for_connect> <port_on_host>
 ```
 
 #### Usage
