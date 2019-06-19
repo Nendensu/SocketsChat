@@ -1,12 +1,15 @@
+#ifndef SERV_LIB_H
+#define SERV_LIB_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <pthread.h> 
 #include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <pthread.h> 
 
 #define BUFFER_SIZE 1024
 #define NAME_SIZE 256
@@ -135,3 +138,5 @@ void new_connection(const int sockfd)
     pthread_create(&tid, NULL, chat, (void *)&args); 
     pthread_detach(tid);
 }
+
+#endif
