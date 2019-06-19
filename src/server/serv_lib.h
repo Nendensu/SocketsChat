@@ -10,11 +10,12 @@
 
 #define BUFFER_SIZE 1024
 #define NAME_SIZE 256
+#define MAX_CONNECTIONS 10
 
 struct arg_struct
 {
-    int arg1;
-    char* arg2;
+    int sockfd;
+    char* name;
 };
 
 void raise_error(const char *msg) 
@@ -31,13 +32,13 @@ void disconnect(const char *name)
     fflush(stdout);
 }
 
-int responce(const int newsockfd, const char *name)
+int response(const int newsockfd, const char *name)
 {
     int check; // Var for check functions return
 
-    const char *responce = "I've got your message"; // Responce from server
+    const char *response = "I've got your message"; // response from server
     
-    check = write(newsockfd, responce, strlen(responce));
+    check = write(newsockfd, response, strlen(response));
     if(check < 0) 
     { 
         disconnect(name);
@@ -53,14 +54,16 @@ void *chat(void *arg)
     char buffer[BUFFER_SIZE];
 
     struct arg_struct *args = (struct arg_struct *) arg;
-    const int newsockfd = args->arg1;
-    char *name = args->arg2;
+    const int newsockfd = args->sockfd;
+    char *name = args->name;
 
     int check; // Var for check functions return
 
+    free(args);
+
     while(1) 
     {
-        bzero(buffer, BUFFER_SIZE);
+        memset(buffer, 0, BUFFER_SIZE);
      	check = read(newsockfd, buffer, BUFFER_SIZE - 1);
      	if(check < 1) 
         { 
@@ -71,7 +74,7 @@ void *chat(void *arg)
 
      	printf("Here is the message from %s: %s\n", name, buffer);
 
-        check = responce(newsockfd, name);
+        check = response(newsockfd, name);
         if(check < 0)
         {
             break;
@@ -82,7 +85,7 @@ void *chat(void *arg)
     close(newsockfd);
 }
 
-void new_connection(const int *sockfd)
+void new_connection(const int sockfd)
 {
     const char *hello = "Hello, "; // Part of hello string from server
    
@@ -90,12 +93,12 @@ void new_connection(const int *sockfd)
     char *name;
     struct sockaddr_in cli_addr;
     pthread_t tid;
-    struct arg_struct args;
+    struct arg_struct *args;
 
     int check; // Var for check functions return
 
     socklen_t cli_len = sizeof(cli_addr);
-    newsockfd = accept(*sockfd, (struct sockaddr *) &cli_addr, &cli_len);
+    newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &cli_len);
     if(newsockfd < 0) 
     { 
         raise_error("On accept");
@@ -105,7 +108,7 @@ void new_connection(const int *sockfd)
     fflush(stdout);
 
     name = (char *) malloc(NAME_SIZE);
-    bzero(name, NAME_SIZE);
+    memset(name, 0, NAME_SIZE);
     check = read(newsockfd, name, NAME_SIZE - 1);
     if(check < 0) 
     { 
@@ -113,19 +116,21 @@ void new_connection(const int *sockfd)
     }
 
     char *hello_string = (char *) malloc(strlen(hello) + strlen(name) + 1);
-    strcpy(hello_string, hello);
-    strcat(hello_string, name);
+    strncpy(hello_string, hello, strlen(hello));
+    strncat(hello_string, name, strlen(name));
 
     check = write(newsockfd, hello_string, strlen(hello_string));
     if(check < 0) 
     { 
 	    raise_error("Writing to socket");
     }
+    free(hello_string);
 
     printf("\033[0;32m---> User login as %s\033[0m\n", name);
 
-    args.arg1 = newsockfd;
-    args.arg2 = name;
+    args = (struct arg_struct *) malloc(sizeof(struct arg_struct));
+    args->sockfd = newsockfd;
+    args->name = name;
 
     pthread_create(&tid, NULL, chat, (void *)&args); 
     pthread_detach(tid);

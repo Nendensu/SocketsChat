@@ -2,7 +2,8 @@
 
 int main(int argc, char *argv[]) 
 {
-    int sockfd, portnum;
+    int sockfd;
+    int portnum;
     struct sockaddr_in serv_addr;
     
     int check; // Var for check functinos return
@@ -18,8 +19,8 @@ int main(int argc, char *argv[])
         raise_error("Opening socket");
     }
      
-    bzero(&serv_addr, sizeof(serv_addr));
-    portnum = atoi(argv[1]);
+    memset(&serv_addr, 0, sizeof(serv_addr));
+    portnum = (int) strtol(argv[1], NULL, 10);
     if(portnum < 1 || portnum > 65535)
     {
         raise_error("Incorrect port number");
@@ -40,12 +41,17 @@ int main(int argc, char *argv[])
 
     while(1)
     {
-        listen(sockfd, 5);
+        check = listen(sockfd, MAX_CONNECTIONS);
+        if(check < 0)
+        {
+            raise_error("While listening socket");
+        }
 
-        new_connection(&sockfd);
+        new_connection(sockfd);
     }
 
-    close(sockfd);
+    // Add exit command
+    //close(sockfd);
      
     return 0; 
 }
