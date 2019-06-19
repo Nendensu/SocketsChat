@@ -1,3 +1,5 @@
+server_source_files := $(wildcard src/server/*.c)
+
 server := build/server
 client := build/client
 
@@ -18,7 +20,7 @@ $(client): src/client.c
 	@echo "Compile client part"
 	@gcc $< -o $@
 
-$(server): src/server/server.c
+$(server): $(server_source_files)
 	@mkdir -p $(shell dirname $@)
 	@echo "Compile server part"
-	@gcc -pthread $< -o $@
+	@gcc -pthread $(server_source_files) -o $@
