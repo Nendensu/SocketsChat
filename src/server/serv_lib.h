@@ -13,7 +13,7 @@
 
 struct arg_struct
 {
-    int *arg1;
+    int arg1;
     char* arg2;
 };
 
@@ -25,13 +25,13 @@ void raise_error(const char *msg)
     exit(1);
 }
 
-void responce(const int *newsockfd)
+void responce(const int newsockfd)
 {
     int check; // Var for check functions return
 
     const char *responce = "I've got your message"; // Responce from server
     
-    check = write(*newsockfd, responce, strlen(responce));
+    check = write(newsockfd, responce, strlen(responce));
     printf("%d", check);
     if(check < 0) 
     { 
@@ -44,16 +44,17 @@ void *chat(void *arg)
     char buffer[BUFFER_SIZE];
 
     struct arg_struct *args = (struct arg_struct *) arg;
-    const int *newsockfd = (int *) args->arg1;
-    char *name = (char *) malloc(sizeof(args->arg2));
-    strcpy(name, args->arg2);
+    const int newsockfd = args->arg1;
+    //char *name = (char *) malloc(sizeof(args->arg2));
+    //strcpy(name, args->arg2);
+    char *name = args->arg2;
 
     int check; // Var for check functions return
 
     while(1) 
     {
         bzero(buffer, BUFFER_SIZE);
-     	check = read(*newsockfd, buffer, BUFFER_SIZE - 1);
+     	check = read(newsockfd, buffer, BUFFER_SIZE - 1);
      	if(check < 0) 
         { 
 	        raise_error("Reading from socket");
@@ -64,7 +65,7 @@ void *chat(void *arg)
         responce(newsockfd);
     }
     
-    close(*newsockfd);
+    close(newsockfd);
 }
 
 void new_connection(const int *sockfd)
@@ -72,7 +73,7 @@ void new_connection(const int *sockfd)
     const char *hello = "Hello, "; // Part of hello string from server
    
     int newsockfd;
-    char name[NAME_SIZE];
+    char *name;
     struct sockaddr_in cli_addr;
     pthread_t tid;
     struct arg_struct args;
@@ -89,6 +90,7 @@ void new_connection(const int *sockfd)
     printf("\033[0;32m---> Accepting connecting from %s\033[0m\n", inet_ntoa(cli_addr.sin_addr));
     fflush(stdout);
 
+    name = (char *) malloc(NAME_SIZE);
     bzero(name, NAME_SIZE);
     check = read(newsockfd, name, NAME_SIZE - 1);
     if(check < 0) 
@@ -108,7 +110,7 @@ void new_connection(const int *sockfd)
 
     printf("\033[0;32m---> User login as %s\033[0m\n", name);
 
-    args.arg1 = &newsockfd;
+    args.arg1 = newsockfd;
     args.arg2 = name;
 
     pthread_create(&tid, NULL, chat, (void *)&args); 
