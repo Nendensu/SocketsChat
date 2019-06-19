@@ -25,18 +25,27 @@ void raise_error(const char *msg)
     exit(1);
 }
 
-void responce(const int newsockfd)
+void disconnect(const char *name)
+{
+    fprintf(stdout, "\033[0;33m---> User %s was disconnected \033[0m\n", name);
+    fflush(stdout);
+}
+
+int responce(const int newsockfd, const char *name)
 {
     int check; // Var for check functions return
 
     const char *responce = "I've got your message"; // Responce from server
     
     check = write(newsockfd, responce, strlen(responce));
-    printf("%d", check);
     if(check < 0) 
     { 
-	    raise_error("Writing to socket");
+        disconnect(name);
+
+        return -1;
     }
+
+    return 0;
 }
 
 void *chat(void *arg)
@@ -45,8 +54,6 @@ void *chat(void *arg)
 
     struct arg_struct *args = (struct arg_struct *) arg;
     const int newsockfd = args->arg1;
-    //char *name = (char *) malloc(sizeof(args->arg2));
-    //strcpy(name, args->arg2);
     char *name = args->arg2;
 
     int check; // Var for check functions return
@@ -55,16 +62,23 @@ void *chat(void *arg)
     {
         bzero(buffer, BUFFER_SIZE);
      	check = read(newsockfd, buffer, BUFFER_SIZE - 1);
-     	if(check < 0) 
+     	if(check < 1) 
         { 
-	        raise_error("Reading from socket");
+            disconnect(name);
+
+            break;
      	}
 
      	printf("Here is the message from %s: %s\n", name, buffer);
 
-        responce(newsockfd);
+        check = responce(newsockfd, name);
+        if(check < 0)
+        {
+            break;
+        }
     }
     
+    pthread_exit(0);
     close(newsockfd);
 }
 
