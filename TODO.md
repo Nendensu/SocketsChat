@@ -6,7 +6,7 @@ All work can be separated into three stages.
 In this stage maintainer must improve code, fix codestyle and remove controversial decisions.
 
 List for client part:
-* Cleints can't exit from chat with EOF. They need to kill process for exit it's not so good because socket stays open
+* Clients can't exit from chat with EOF. They need to kill process to exit and it's not so good because socket stays open
 * Endless while is BIG problem
 * Maybe smthing else...
 
@@ -17,12 +17,12 @@ List for server part:
 
 
 ## Stage II
-This is part where maintainer must improve functionality
+This is a part where maintainer must improve functionality
 
 List:
-* Big messages is not supported. Fix
-* Client can't communicate together, only write-client and read-server model works now. Fix
-* Add manualy disconect user from server
+* Big messages are not supported. Fix
+* Clients can't communicate together, only write-client and read-server model works now. Fix
+* Add manual disconnection of a user from a server
 
 
 ## Stage III
